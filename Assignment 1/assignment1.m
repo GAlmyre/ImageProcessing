@@ -1,6 +1,7 @@
 %% Initialize the texture and useful values
-
-InputText = im2double(imread('text1.jpg'));
+pkg load image;
+%InputText = im2double(imread('text1.jpg'));
+InputText = imread('text1.jpg');
 [h, w, c] = size(InputText);
 OutputText = zeros(h, w, c);
 FillingMask = zeros(h, w, 1);
@@ -26,11 +27,15 @@ OutputText(h/2-1:h/2+1, w/2-1:w/2+1, :) = RandomPatch;
 figure(2)
 imagesc(OutputText);
 imwrite(OutputText, 'OutputText', 'PNG');
+
 FillingMask(find(OutputText(:,:,1)+OutputText(:,:,2)+OutputText(:,:,3))) = 1;
-
-FillingMask = FillingMask-imdilate(FillingMask);
-
+dilateElement = strel("square", 3);
+Layer = imdilate(FillingMask, dilateElement) - FillingMask;
+[x,y] = find(Layer);
+Spatch = getPatch(i, j, 3, InputText)
+Tpatch = getPatch(i, j, 3, OutputText)
+ssd = ssd(Spatch, Tpatch);
 %% while the image is not filled
-while(find(FillingMask))
+%while(find(FillingMask))
     
-end
+%end

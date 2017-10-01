@@ -1,23 +1,20 @@
 %% Initialize the texture and useful values
 pkg load image;
-%InputText = im2double(imread('text1.jpg'));
-InputText = imread('text1.jpg');
+InputText = im2double(imread('text1.jpg'));
+%InputText = imread('text1.jpg');
 [h, w, c] = size(InputText);
 OutputText = zeros(h, w, c);
-FillingMask = zeros(h, w, 1);
-
-PatchSize = 3;
-% useful to have a mask image 1 for filled and 0 for not filled
-% imdilate
-% find function can tell which pixels are 1  find(M-imdilate(M,...)) (a
-% square is good for structuring element
+FillingMask = zeros(h, w);
+dilateElement = strel("square", 3);
+seedSize = 3;
+patchSize = 9;
 
 %% Get a random 3*3 patche from the sample image
 
-x = randi([1 h-PatchSize], 1);
-y = randi([1 w-PatchSize], 1);
+x = randi([1 h-seedSize], 1);
+y = randi([1 w-seedSize], 1);
 figure(1)
-RandomPatch = InputText(x:x+PatchSize-1, y:y+PatchSize-1, :);
+RandomPatch = InputText(x:x+seedSize-1, y:y+seedSize-1, :);
 imagesc(RandomPatch); 
 imwrite(RandomPatch, 'RandomPatch', 'PNG');
 
@@ -29,13 +26,24 @@ imagesc(OutputText);
 imwrite(OutputText, 'OutputText', 'PNG');
 
 FillingMask(find(OutputText(:,:,1)+OutputText(:,:,2)+OutputText(:,:,3))) = 1;
-dilateElement = strel("square", 3);
+patchHalfSize = floor(patchSize/2);
+
+% we add padding to the mask
+FillingMask = padarray(FillingMask, [patchHalfSize, patchHalfSize]);
+OutputText = padarray(OutputText, [patchHalfSize, patchHalfSize]);
+
+% Main loop 
+%while
 Layer = imdilate(FillingMask, dilateElement) - FillingMask;
 [x,y] = find(Layer);
-Spatch = getPatch(i, j, 3, InputText)
-Tpatch = getPatch(i, j, 3, OutputText)
-ssd = ssd(Spatch, Tpatch);
+
+for i = 2:size(InputText(1)-1)
+  for j = 2:size(InputText(2)-1)
+  Spatch = getPatch(i, j, 3, InputText);
+  Tpatch = getPatch(x, y, 3, OutputText);
+  ssd = ssd(Spatch, Tpatch);
+  endfor
+endfor
 %% while the image is not filled
 %while(find(FillingMask))
-    
 %end

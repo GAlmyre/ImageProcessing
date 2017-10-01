@@ -37,12 +37,9 @@ OutputText = padarray(OutputText, [patchHalfSize, patchHalfSize]);
 Layer = imdilate(FillingMask, dilateElement) - FillingMask;
 [x,y] = find(Layer);
 
-for i = 2:size(InputText(1)-1)
-  for j = 2:size(InputText(2)-1)
-  Spatch = getPatch(i, j, 3, InputText);
-  Tpatch = getPatch(x, y, 3, OutputText);
-  ssd = ssd(Spatch, Tpatch);
-  endfor
+% for every pixel at 1 in the layer
+for it=1:size(x)
+
 endfor
 %% while the image is not filled
 %while(find(FillingMask))

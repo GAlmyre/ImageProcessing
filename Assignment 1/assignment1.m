@@ -1,12 +1,13 @@
 %% Initialize the texture and useful values
-pkg load image;
+%pkg load image;
 InputText = im2double(imread('text1.jpg'));
 %InputText = imread('text1.jpg');
 [h, w, c] = size(InputText);
 OutputText = zeros(h, w, c);
 FillingMask = zeros(h, w);
-dilateElement = strel("square", 3);
-seedSize = 3;
+dilateElement = strel('square', 3);
+seedSize = 17;
+seedHalfSize = floor(seedSize/2);
 patchSize = 9;
 
 %% Get a random 3*3 patche from the sample image
@@ -20,7 +21,7 @@ RandomPatch = InputText(x:x+seedSize-1, y:y+seedSize-1, :);
 
 %% copy the patch at the center of the outputText
 
-OutputText(h/2-1:h/2+1, w/2-1:w/2+1, :) = RandomPatch;
+OutputText(h/2-seedHalfSize:h/2+seedHalfSize, w/2-seedHalfSize:w/2+seedHalfSize, :) = RandomPatch;
 %figure(2)
 %imagesc(OutputText);
 %imwrite(OutputText, 'OutputText', 'PNG');
@@ -45,7 +46,8 @@ while nnz(~FillingMask) > 0
     patch_mask = getPatch(x(it),y(it),patchHalfSize,FillingMask);
     
     bestSSD = intmax;
-    bestI = bestJ = 0;
+    bestI = 0; 
+    bestJ = 0;
     
     % we search the best patch in the input texture
     for i=patchHalfSize + 1:w - patchHalfSize
@@ -60,16 +62,16 @@ while nnz(~FillingMask) > 0
           bestSSD = currentSSD;
           bestI = i;
           bestJ = j;
-        endif
-      endfor
-    endfor
+        end
+      end
+    end
     
     FillingMask(x(it),y(it)) = 1;
     OutputText(x(it),y(it),:) = InputText(bestI,bestJ,:);
     imshow(OutputText)
     
-  endfor
+  end
 %endfor
-endwhile
+end
 figure(3);
 imagesc(OutputText);

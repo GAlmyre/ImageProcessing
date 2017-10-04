@@ -5,7 +5,7 @@ InputText = im2double(imread('text1.jpg'));
 OutputText = zeros(h, w, c);
 FillingMask = zeros(h, w);
 dilateElement = strel('square', 3);
-seedSize = 63;
+seedSize = 3;
 seedHalfSize = floor(seedSize/2);
 patchSize = 9;
 
@@ -34,8 +34,6 @@ while nnz(~FillingMask) > 0
   y = y(:,:,:)+patchHalfSize;
   % for every pixel at 1 in the layer
   for it=1:size(x)
-      %x(it)-patchHalfSize
-      %y(it)-patchHalfSize
     %we create a patch from the outputText
     outputPatch = getPatch(x(it),y(it),patchHalfSize,OutputText);
     patch_mask = getPatch(x(it),y(it),patchHalfSize,paddedFillingMask);

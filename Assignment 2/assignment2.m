@@ -4,19 +4,22 @@ pkg load image;
 patchSize = 2;
 target = im2double(imread('a.png'));
 source = im2double(imread('b.png'));
+
+% we create a padded image to handle the borders
+padTarget = padarray(target, [patchSize patchSize], 'symmetric');
+padSource = padarray(source, [patchSize patchSize], 'symmetric');
 [h, w, c] = size(target);
 [hS, wS, cS] = size(source);
 offsetMap = zeros(h,w,2);
-output = zeros(h,w,c);
 
-min_i = patchSize+1;
-max_i = h-patchSize;
-min_j = patchSize+1;
-max_j = w-patchSize;
+min_i = 2;
+max_i = h;
+min_j = 2;
+max_j = w;
 
-minBound = patchSize+2;
-maxBound_i = hS-patchSize-1;
-maxBound_j = wS-patchSize-1;
+minBound = 1;
+maxBound_i = hS;
+maxBound_j = wS;
 
 % initialize the offsetMap to random values :
 offsetMap(:,:,1) = randi([minBound maxBound_i], [h,w,1]);
@@ -55,15 +58,15 @@ for k = 1:nbPath
       y = min(maxBound_j, max(minBound, offsetMap(i,j,2)));
       
       % compute the SSD of the current patch
-      currentPatch = getPatch(i,j,patchSize,target);
-      currentCandidate = getPatch(x,y,patchSize,source);
+      currentPatch = getPatch(i+patchSize,j+patchSize,patchSize,padTarget);
+      currentCandidate = getPatch(x+patchSize,y+patchSize,patchSize,padSource);
       bestSSD = ssd(currentPatch, currentCandidate);
 
       % compute the SSD of the top or bottom candidate
       
       x = min(maxBound_i, max(minBound,offsetMap(i+offset,j,1)-offset));
       y = min(maxBound_j, max(minBound,offsetMap(i+offset,j,2)));
-      topOrBottomCandidate = getPatch(x,y,patchSize,source);
+      topOrBottomCandidate = getPatch(x+patchSize,y+patchSize,patchSize,padSource);
       testSSD = ssd(currentPatch, topOrBottomCandidate);
       if testSSD < bestSSD
         offsetMap(i,j,1) = x;
@@ -74,7 +77,7 @@ for k = 1:nbPath
       % compute the SSD of the left  or right candidate
       x = min(maxBound_i, max(minBound,offsetMap(i,j+offset,1)));
       y = min(maxBound_j, max(minBound,offsetMap(i,j+offset,2)-offset));
-      leftOrRightCandidate = getPatch(x,y,patchSize,source);
+      leftOrRightCandidate = getPatch(x+patchSize,y+patchSize,patchSize,padSource);
       testSSD = ssd(currentPatch, leftOrRightCandidate);
       if testSSD < bestSSD
         offsetMap(i,j,1) = x;
@@ -84,7 +87,8 @@ for k = 1:nbPath
     end
   end
 loopDone = loopDone+1;
-output = computeFromOffset(source, offsetMap, patchSize);
+output = computeFromOffset(padSource, offsetMap, patchSize);
+output = output(patchSize:w+patchSize, patchSize:h +patchSize, :);
 imshow(output);
 end
 

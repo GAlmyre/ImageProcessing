@@ -1,7 +1,7 @@
 % create image target with pixels from source
  
-pkg load image;
-patchSize = 2;
+%pkg load image;
+patchSize = 10;
 target = im2double(imread('a.png'));
 source = im2double(imread('b.png'));
 
@@ -25,7 +25,7 @@ maxBound_j = wS;
 offsetMap(:,:,1) = randi([minBound maxBound_i], [h,w,1]);
 offsetMap(:,:,2) = randi([minBound maxBound_j], [h,w,1]);
 
-nbPath = 1;
+nbPath = 8;
 loopDone = 0;
 
 startI = 0;
@@ -44,10 +44,10 @@ for k = 1:nbPath
     offset = -1;
   % reverse scanline order
   else
-    endI = min_i;
-    endJ = min_j;
-    startI = max_i;
-    startJ = max_j;
+    endI = min_i-1;
+    endJ = min_j-1;
+    startI = max_i-1;
+    startJ = max_j-1;
     offset = +1;
   end
 
@@ -86,9 +86,9 @@ for k = 1:nbPath
       end
     end
   end
+% reconstruct the image for each iteration
 loopDone = loopDone+1;
-output = computeFromOffset(padSource, offsetMap, patchSize);
-output = output(patchSize:w+patchSize, patchSize:h +patchSize, :);
+output = computeFromOffset(source, offsetMap, patchSize);
 imshow(output);
 end
 
